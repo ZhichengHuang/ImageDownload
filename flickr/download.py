@@ -16,8 +16,8 @@ import pickle
 
 API_KEY="28ec2097317c948561c7aff0922a2275"
 API_SECRET="0af5c27bc03cd4a6"
-out_path=""
-group_id=""
+out_path="d:\\data_flickr"
+group_id="723938@N21"
 
 def get_file_home(group_id):
     fl = flickrapi.FlickrAPI(api_key=API_KEY,secret=API_SECRET,format="parsed-json")
@@ -25,8 +25,6 @@ def get_file_home(group_id):
     page_id=1
     while True:
         rsp = fl.groups.pools.getPhotos(group_id=group_id,page_id=page_id)
-        if rsp['stat'] !="ok":
-            break
         photos = rsp['photos']['photo']
         for photo in photos:
             tmp={
@@ -36,14 +34,17 @@ def get_file_home(group_id):
                 "group_id": group_id
             }
             home_url.append(tmp)
+        if rsp['photos']['pages']<=page_id:
+            break
         page_id+=1
+        print("page_id=",page_id)
     return home_url
 
 def get_video_url(home_url):
     chrome_options = Options()
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--disable-gpu')
-    driver = webdriver.Chrome(chrome_options=chrome_options,executable_path="C:\\Users\\t-zhihua\\Downloads\\chromedriver.exe")
+    driver = webdriver.Chrome(chrome_options=chrome_options,executable_path="c:\\Users\\t-zhihua\\Downloads\\chromedriver.exe")
     out_list=[]
     error_list=[]
     for item in home_url:
@@ -80,4 +81,4 @@ def process_function():
 
 
 if __name__=="__main__":
-    process_function
+    process_function()
