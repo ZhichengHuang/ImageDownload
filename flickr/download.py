@@ -68,8 +68,8 @@ def get_video_url(home_url,que,group_id):
             print(e)
             error_list.append(item)
         if index%100==0:
-            driver.close()
-            driver = webdriver.Chrome(chrome_options=chrome_options,executable_path="c:\\Users\\t-zhihua\\Downloads\\chromedriver.exe")
+            # driver.close()
+            # driver = webdriver.Chrome(chrome_options=chrome_options,executable_path="c:\\Users\\t-zhihua\\Downloads\\chromedriver.exe")
             print("process {} item".format(index))
         
     print("total={},get_video_url={},error_url={}".format(len(home_url),len(out_list),len(error_list)))
@@ -77,11 +77,11 @@ def get_video_url(home_url,que,group_id):
     #return out_list,error_list
 
 def download_video(que):
-    while True:
+    num=0
+    while not que.empty():
         item = que.get()
-        if item is None:
-            break
-        
+        if que.qsize()<5:
+            sleep(2)
         num=random.randint(0,100)
         try:
             res=requests.get(item['video_url'])
@@ -107,6 +107,10 @@ def download_video(que):
                 file_path = os.path.join(file_dir,item['owner']+"_"+item['id']+"_"+str(num)+".mp4")
                 with open(file_path,"wb") as f:
                     f.write(data)
+        if num%100==0:
+            print("download {} videos".format(num))
+            sleep(5)
+        num+=1
         
 
 def get_video_file(out_list):
@@ -115,7 +119,7 @@ def get_video_file(out_list):
     #p.map(download_video,out_list)
 
 
-def process_function():
+def process_function(group_id):
     q=Queue()
     home_url=get_file_home(group_id)
     p1=Process(target=get_video_url,args=(home_url,q,group_id))
@@ -125,9 +129,10 @@ def process_function():
     p1.start()
     c1.start()
     p1.join()
-    q.put(None)
     #pickle.dump(error_list,open(os.path.join(out_path,group_id,"error.pkl"),'wb'))
 
 
 if __name__=="__main__":
-    process_function()
+    group_ids=['676823@N25','2723450@N25']
+    for item in group_ids:
+        process_function(item)
