@@ -22,7 +22,7 @@ import pickle
 API_KEY="28ec2097317c948561c7aff0922a2275"
 API_SECRET="0af5c27bc03cd4a6"
 out_path="d:\\data_flickr"
-group_id="723938@N21"
+#group_id="723938@N21"
 
 def get_file_home(group_id):
     fl = flickrapi.FlickrAPI(api_key=API_KEY,secret=API_SECRET,format="parsed-json")
@@ -71,17 +71,26 @@ def get_video_url(home_url,que,group_id):
             # driver.close()
             # driver = webdriver.Chrome(chrome_options=chrome_options,executable_path="c:\\Users\\t-zhihua\\Downloads\\chromedriver.exe")
             print("process {} item".format(index))
+    que.put("#")
         
     print("total={},get_video_url={},error_url={}".format(len(home_url),len(out_list),len(error_list)))
     pickle.dump(error_list,open(os.path.join(out_path,str(group_id),"error.pkl"),'wb'))
     #return out_list,error_list
 
 def download_video(que):
-    num=0
-    while not que.empty():
+    index=0
+    
+    while True:
+        if que.empty():
+            sleep(100)
+       
+        print("que size",que.qsize())
+        index+=1
+        
         item = que.get()
-        if que.qsize()<5:
-            sleep(2)
+        if item in ["#",]:
+            break
+       
         num=random.randint(0,100)
         try:
             res=requests.get(item['video_url'])
@@ -107,10 +116,9 @@ def download_video(que):
                 file_path = os.path.join(file_dir,item['owner']+"_"+item['id']+"_"+str(num)+".mp4")
                 with open(file_path,"wb") as f:
                     f.write(data)
-        if num%100==0:
-            print("download {} videos".format(num))
-            sleep(5)
-        num+=1
+    print("finish download video")
+        
+        
         
 
 def get_video_file(out_list):
@@ -127,6 +135,7 @@ def process_function(group_id):
     c1=Process(target=download_video,args=(q,))
     #get_video_file(out_list)
     p1.start()
+    sleep(5)
     c1.start()
     p1.join()
     #pickle.dump(error_list,open(os.path.join(out_path,group_id,"error.pkl"),'wb'))
