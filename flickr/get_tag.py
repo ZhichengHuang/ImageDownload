@@ -39,7 +39,7 @@ def get_tags(home_url,group_id):
     out=defaultdict(list)
 
     for item in home_url:
-        infors=fl.photo.getInfo(item['id'])
+        infors=fl.photo.getInfo(photo_id =item['id'])
         key = str(item['group_id'])+"_"+str(item['id'])
         tags = infors['photo']['tags']
         for tag in tags:
